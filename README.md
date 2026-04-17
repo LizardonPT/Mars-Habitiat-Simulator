@@ -53,7 +53,52 @@ Os módulos estão ligados por corredores. O laboratório e a estufa ficam agrup
 
 ### Comportamento dos Agentes
 
-[A preencher]
+**FSM Agent**
+
+```mermaid
+stateDiagram-v2
+    [*] --> Inactive
+    Inactive --> Walking : new_task
+    Walking --> Working : new_work
+    Walking --> Sleeping : dorms
+    Walking --> GettingResources : storage
+    Working --> Inactive : task_finished
+    Sleeping --> Inactive : rest_finished
+    GettingResources --> Inactive : finish_resources
+    Inactive --> Response : alarm
+    Working --> Response : alarm
+    Sleeping --> Response : alarm
+    GettingResources --> Response : alarm
+    Walking --> Response : alarme_ativado
+    Response --> Isolation : isolation_start
+    Response --> Evacuate : evuacuation_started
+    Isolation --> Inactive : incident_solved
+    Isolation --> Evacuate : evacuate_start
+    Evacuate --> [*] : exit
+```
+
+Em condições normais, o tripulante alterna entre trabalhar (laboratório ou estufa), descansar (habitação) e recolher recursos (armazém), com a próxima tarefa a ser escolhida de forma pseudo-aleatória quando o estado `Inactive` é atingido. Quando um alarme é ativado, o tripulante muda imediatamente para `Response`, independentemente do estado atual, e avalia se existe uma ação de isolamento acessível; caso contrário, move-se para a cápsula mais próxima.
+
+**FSM Robot**
+
+```mermaid
+stateDiagram-v2
+    [*] --> Patrol
+    Patrol --> Trasport : transport_task
+    Patrol --> Inspect : inspect_task
+    Patrol --> Recharge : low_battery
+    Trasportation --> Patrol : delivered
+    Inspect --> Patrol : inspect_end
+    Recharge --> Patrol : full_battery
+    Patrol --> Incident : alarm
+    Trasportation --> Incident : alarm
+    Inspect --> Incident : alarm
+    Incident --> Recharge : critique_battery
+    Recharge --> Incident : incident_enough_battery
+    Incident --> Patrol : incident_solved
+```
+
+Os robôs priorizam resolver os incidentes em relação às tarefas normais assim que o alarme é ativado. A única exceção é o estado de bateria crítica, que obriga o robô a deslocar-se à zona técnica antes de regressar à contenção. Durante a evacuação, os robôs continuam em `Incident`, permitindo que mais tripulantes consigam alcançar as saídas.
 
 ### Pathfinding
 
